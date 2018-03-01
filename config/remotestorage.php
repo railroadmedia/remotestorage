@@ -12,7 +12,7 @@ return
 
             'local' => [
                 'driver' => 'local',
-                'root' => storage_path(),
+                'root' => storage_path('app'),
             ],
         ],
         'filesystems.default' => 'local'

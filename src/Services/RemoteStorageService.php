@@ -44,7 +44,7 @@ class RemoteStorageService
         );
     }
 
-    /**
+    /** Read a file
      * @param $target
      * @return bool|false|string
      */
@@ -53,7 +53,7 @@ class RemoteStorageService
         return $this->filesystem->read($target);
     }
 
-    /**
+    /** Check if file exist
      * @param string $target
      * @return bool
      */
@@ -62,7 +62,7 @@ class RemoteStorageService
         return $this->filesystem->has($target);
     }
 
-    /**
+    /** Delete a file
      * @param string $target
      * @return bool
      */
@@ -71,7 +71,7 @@ class RemoteStorageService
         return $this->filesystem->delete($target);
     }
 
-    /**
+    /** Rename a file
      * @param string $target
      * @param string $newName
      * @return bool
@@ -81,7 +81,7 @@ class RemoteStorageService
         return $this->filesystem->rename($target, $newName);
     }
 
-    /**
+    /** Duplicate a file
      * @param string $original
      * @param string $duplicate
      * @return bool
@@ -91,7 +91,7 @@ class RemoteStorageService
         return $this->filesystem->copy($original, $duplicate);
     }
 
-    /**
+    /** Get file mimetype
      * @param string $target
      * @return bool|false|string
      */
@@ -100,7 +100,7 @@ class RemoteStorageService
         return $this->filesystem->getMimetype($target);
     }
 
-    /**
+    /** Get file timestamp
      * @param string $target
      * @return bool|false|string
      */
@@ -109,7 +109,7 @@ class RemoteStorageService
         return $this->filesystem->getTimestamp($target);
     }
 
-    /**
+    /** Get file size
      * @param string $target
      * @return bool|false|int
      */
@@ -118,7 +118,7 @@ class RemoteStorageService
         return $this->filesystem->getSize($target);
     }
 
-    /**
+    /** Create a directory
      * @param string $target
      * @return bool
      */
@@ -127,7 +127,7 @@ class RemoteStorageService
         return $this->filesystem->createDir($target);
     }
 
-    /**
+    /** Delete a directory
      * @param string $target
      * @return bool
      */
@@ -136,7 +136,7 @@ class RemoteStorageService
         return $this->filesystem->deleteDir($target);
     }
 
-    /**
+    /** Return directory content
      * @param null|string $targetDir
      * @return array
      */
@@ -147,5 +147,14 @@ class RemoteStorageService
         }else{
             return $this->filesystem->listContents();
         }
+    }
+
+    /** Return the target url
+     * @param $target
+     * @return mixed
+     */
+    public function url($target)
+    {
+        return $this->filesystem->getDriver()->getAdapter()->applyPathPrefix($target);
     }
 }
