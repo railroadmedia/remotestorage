@@ -143,7 +143,7 @@ All methods below are *public*.
 
 ### put
 
-#### Usage Example
+#### Usage Example(s)
 
 ```php
 $upload = $this->remoteStorageService->put($filenameRelative, $filenameAbsolute);
@@ -206,7 +206,7 @@ failed , boolean , false
 
 ### read
 
-#### Usage Example
+#### Usage Example(s)
 
 ```php
 $file = $this->remoteStorageService->read($filenameRelative);
@@ -243,7 +243,7 @@ succeeded, string, `"b"""Ø à\x00\x10JFIF\x00\x01\x01\x01\x00`\x00`\x00\x00 �
 
 ### exists
 
-#### Usage Example
+#### Usage Example(s)
 
 ```php
 $exists = $this->remoteStorageService->exists('foo/bar.jpg');
@@ -295,7 +295,7 @@ does not exist, boolean , false
 ### delete
 
 
-#### Usage Example
+#### Usage Example(s)
 
 ```php
 $this->remoteStorageService->delete('foo/bar.jpg');
