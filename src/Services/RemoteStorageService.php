@@ -5,18 +5,22 @@ namespace Railroad\RemoteStorage\Services;
 use Illuminate\Filesystem\FilesystemManager;
 use League\Flysystem\Filesystem;
 
-
 class RemoteStorageService
 {
     static $visibilityPublic = ['visibility' => 'public'];
 
-    /** @var Filesystem */
-    public $filesystem;
-
     protected $availableVisibilities = [
-        'public' => 'public'
+        'public' => 'public',
     ];
 
+    /**
+     * @var Filesystem
+     */
+    public $filesystem;
+
+    /**
+     * @var FilesystemManager
+     */
     protected $fileSystemManager;
 
     public function __construct($optionalPathPrefix = null, FilesystemManager $filesystemManager)
@@ -44,7 +48,9 @@ class RemoteStorageService
         );
     }
 
-    /** Read a file
+    /**
+     * Read a file
+     *
      * @param $target
      * @return bool|false|string
      */
@@ -53,7 +59,9 @@ class RemoteStorageService
         return $this->filesystem->read($target);
     }
 
-    /** Check if file exist
+    /**
+     * Check if file exist
+     *
      * @param string $target
      * @return bool
      */
@@ -62,7 +70,9 @@ class RemoteStorageService
         return $this->filesystem->has($target);
     }
 
-    /** Delete a file
+    /**
+     * Delete a file
+     *
      * @param string $target
      * @return bool
      */
@@ -71,7 +81,9 @@ class RemoteStorageService
         return $this->filesystem->delete($target);
     }
 
-    /** Rename a file
+    /**
+     * Rename a file
+     *
      * @param string $target
      * @param string $newName
      * @return bool
@@ -81,7 +93,9 @@ class RemoteStorageService
         return $this->filesystem->rename($target, $newName);
     }
 
-    /** Duplicate a file
+    /**
+     * Duplicate a file
+     *
      * @param string $original
      * @param string $duplicate
      * @return bool
@@ -91,7 +105,9 @@ class RemoteStorageService
         return $this->filesystem->copy($original, $duplicate);
     }
 
-    /** Get file mimetype
+    /**
+     * Get file mimetype
+     *
      * @param string $target
      * @return bool|false|string
      */
@@ -100,7 +116,9 @@ class RemoteStorageService
         return $this->filesystem->getMimetype($target);
     }
 
-    /** Get file timestamp
+    /**
+     * Get file timestamp
+     *
      * @param string $target
      * @return bool|false|string
      */
@@ -109,7 +127,9 @@ class RemoteStorageService
         return $this->filesystem->getTimestamp($target);
     }
 
-    /** Get file size
+    /**
+     * Get file size
+     *
      * @param string $target
      * @return bool|false|int
      */
@@ -118,7 +138,9 @@ class RemoteStorageService
         return $this->filesystem->getSize($target);
     }
 
-    /** Create a directory
+    /**
+     * Create a directory
+     *
      * @param string $target
      * @return bool
      */
@@ -127,7 +149,9 @@ class RemoteStorageService
         return $this->filesystem->createDir($target);
     }
 
-    /** Delete a directory
+    /**
+     * Delete a directory
+     *
      * @param string $target
      * @return bool
      */
@@ -136,25 +160,42 @@ class RemoteStorageService
         return $this->filesystem->deleteDir($target);
     }
 
-    /** Return directory content
+    /**
+     * Return directory content
+     *
      * @param null|string $targetDir
      * @return array
      */
     public function listContents($targetDir = null)
     {
-        if(!empty($targetDir)){
+        if (!empty($targetDir)) {
             return $this->filesystem->listContents($targetDir, true);
-        }else{
+        } else {
             return $this->filesystem->listContents();
         }
     }
 
-    /** Return the target url
+    /**
+     * Return the target url
+     *
      * @param $target
      * @return mixed
      */
     public function url($target)
     {
-        return $this->filesystem->getDriver()->getAdapter()->applyPathPrefix($target);
+        return $this->filesystem->getDriver()
+            ->getAdapter()
+            ->applyPathPrefix($target);
+    }
+
+    /**
+     * @param $driver
+     * @return $this
+     */
+    public function setDriver($driver)
+    {
+        $this->filesystem = $this->fileSystemManager->disk($driver);
+
+        return $this;
     }
 }
