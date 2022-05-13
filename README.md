@@ -77,7 +77,9 @@ Add the service provider (`\Railroad\RemoteStorage\Providers\RemoteStorageServic
 Run `$ php artisan vendor:publish` to copy the config file and create a *remotestorage.php* file in your application's */config* directory. This will take the values you supplied in the *.env* file and pass them needed.
 
 
-
+### Automated Tests For This Package
+Copy `.env.testing.example` to just `.env.testing`. Add your s3 aws details. DO NOT USE A BUCKET WHICH CANNOT BE WIPED. 
+Random items from the bucket may be deleted during testing.
 
 
 ### Use

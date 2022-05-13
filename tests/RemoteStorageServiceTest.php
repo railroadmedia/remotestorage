@@ -1,9 +1,9 @@
 <?php
 
+namespace Railroad\RemoteStorage\Tests;
 
 use Illuminate\Support\Facades\Storage;
 use Railroad\RemoteStorage\Services\RemoteStorageService;
-use Railroad\RemoteStorage\Tests\RemoteStorageTestCase;
 
 class RemoteStorageServiceTest extends RemoteStorageTestCase
 {
@@ -12,62 +12,75 @@ class RemoteStorageServiceTest extends RemoteStorageTestCase
      */
     private $classBeingTested;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         $this->classBeingTested = $this->app->make(RemoteStorageService::class);
     }
 
+    public function generate_local_image($fileName = 'test-image.jpg')
+    {
+        $imgLocalPath = sys_get_temp_dir() . "/" . $fileName;
+        $img = imagecreatetruecolor(20, 20);
+        $bg = imagecolorallocate($img, 255, 255, 255);
+        imagefilledrectangle($img, 0, 0, 120, 20, $bg);
+        imagejpeg($img, $imgLocalPath, 10);
+
+        return $imgLocalPath;
+    }
+
     public function test_put()
     {
-        $filenameAbsolute = $this->faker->image(sys_get_temp_dir());
-        $filenameRelative = $this->getFilenameRelativeFromAbsolute($filenameAbsolute);
+        $fileName = 'test-image.jpg';
+        $imgLocalPath = $this->generate_local_image($fileName);
 
-        $upload = $this->classBeingTested->put($filenameRelative, $filenameAbsolute);
+        $upload = $this->classBeingTested->put($fileName, $imgLocalPath);
 
         if (!$upload) {
             $this->fail('upload appears to have failed.');
         }
 
-        $this->assertTrue($this->classBeingTested->exists($filenameRelative));
+        $this->assertTrue($this->classBeingTested->exists($fileName));
     }
 
     public function test_read()
     {
-        $filenameAbsolute = $this->faker->image(sys_get_temp_dir());
-        $filenameRelative = $this->getFilenameRelativeFromAbsolute($filenameAbsolute);
+        $fileName = 'test-image.jpg';
+        $imgLocalPath = $this->generate_local_image($fileName);
 
-        $upload = $this->classBeingTested->put($filenameRelative, $filenameAbsolute);
+        $upload = $this->classBeingTested->put($fileName, $imgLocalPath);
+
         $this->assertTrue($upload);
         $this->assertEquals(
-            file_get_contents($this->getFilenameAbsoluteFromRelative($filenameRelative)),
-            $this->classBeingTested->filesystem->read($filenameRelative)
+            file_get_contents($this->getFilenameAbsoluteFromRelative($fileName)),
+            $this->classBeingTested->filesystem->read($fileName)
         );
     }
 
     public function test_exists()
     {
-        $filenameAbsolute = $this->faker->image(sys_get_temp_dir());
-        $filenameRelative = $this->getFilenameRelativeFromAbsolute($filenameAbsolute);
+        $fileName = 'test-image.jpg';
+        $imgLocalPath = $this->generate_local_image($fileName);
 
-        $this->classBeingTested->put($filenameRelative, $filenameAbsolute);
+        $upload = $this->classBeingTested->put($fileName, $imgLocalPath);
 
-        $this->assertTrue($this->classBeingTested->exists($filenameRelative));
+        $this->assertTrue($this->classBeingTested->exists($fileName));
     }
 
     public function test_delete()
     {
-        $filenameAbsolute = $this->faker->image(sys_get_temp_dir());
-        $filenameRelative = $this->getFilenameRelativeFromAbsolute($filenameAbsolute);
-        $this->classBeingTested->put($filenameRelative, $filenameAbsolute);
+        $fileName = 'test-image.jpg';
+        $imgLocalPath = $this->generate_local_image($fileName);
 
-        $this->assertTrue($this->classBeingTested->delete($filenameRelative));
-        $this->assertFalse($this->classBeingTested->exists($filenameRelative));
+        $upload = $this->classBeingTested->put($fileName, $imgLocalPath);
+
+        $this->assertTrue($this->classBeingTested->delete($fileName));
+        $this->assertFalse($this->classBeingTested->exists($fileName));
     }
 
     public function test_create_dir()
     {
-        $directoryName = $this->faker->word;
+        $directoryName = 'test-path';
         $results = $this->classBeingTested->createDir($directoryName);
 
         $this->assertTrue($results);
@@ -76,59 +89,60 @@ class RemoteStorageServiceTest extends RemoteStorageTestCase
 
     public function test_rename()
     {
-        $filenameAbsolute = $this->faker->image(sys_get_temp_dir());
+        $fileName = 'test-image.jpg';
+        $imgLocalPath = $this->generate_local_image($fileName);
 
-        $filenameRelative = $this->getFilenameRelativeFromAbsolute($filenameAbsolute);
-        $this->classBeingTested->put($filenameRelative, $filenameAbsolute);
-        $results = $this->classBeingTested->rename($filenameRelative, 'roxana.jpg');
+        $upload = $this->classBeingTested->put($fileName, $imgLocalPath);
+
+        $results = $this->classBeingTested->rename($fileName, 'roxana.jpg');
 
         $this->assertTrue($results);
-        $this->assertFalse($this->classBeingTested->exists($filenameRelative));
+        $this->assertFalse($this->classBeingTested->exists($fileName));
+        $this->assertTrue($this->classBeingTested->exists('roxana.jpg'));
     }
 
     public function test_copy()
     {
-        $filenameAbsolute = $this->faker->image(sys_get_temp_dir());
+        $fileName = 'test-image.jpg';
+        $imgLocalPath = $this->generate_local_image($fileName);
 
-        $filenameRelative = $this->getFilenameRelativeFromAbsolute($filenameAbsolute);
-        $this->classBeingTested->put($filenameRelative, $filenameAbsolute);
+        $upload = $this->classBeingTested->put($fileName, $imgLocalPath);
 
-
-        $newFile = $this->faker->word . '.' . $this->faker->word;
-        $this->classBeingTested->copy($filenameRelative, $newFile);
+        $newFile = 'roxana.jpg';
+        $this->classBeingTested->copy($fileName, $newFile);
 
         $this->assertEquals(
-            file_get_contents($filenameAbsolute),
+            file_get_contents($imgLocalPath),
             $this->classBeingTested->read($newFile)
         );
         $this->assertEquals(
-            file_get_contents($filenameAbsolute),
+            file_get_contents($imgLocalPath),
             $this->remoteStorageService->read($newFile)
         );
     }
 
     public function test_get_mimetype()
     {
-        $filenameAbsolute = $this->faker->image(sys_get_temp_dir());
+        $fileName = 'test-image.jpg';
+        $imgLocalPath = $this->generate_local_image($fileName);
 
-        $filenameRelative = $this->getFilenameRelativeFromAbsolute($filenameAbsolute);
-        $this->classBeingTested->put($filenameRelative, $filenameAbsolute);
+        $upload = $this->classBeingTested->put($fileName, $imgLocalPath);
 
         $this->assertEquals(
-            exif_read_data($filenameAbsolute)['MimeType'],
-            $this->classBeingTested->getMimetype($this->getFilenameRelativeFromAbsolute($filenameAbsolute))
+            exif_read_data($imgLocalPath)['MimeType'],
+            $this->classBeingTested->getMimetype($this->getFilenameRelativeFromAbsolute($imgLocalPath))
         );
     }
 
     public function test_get_timestamp()
     {
-        $filenameAbsolute = $this->faker->image(sys_get_temp_dir());
+        $fileName = 'test-image.jpg';
+        $imgLocalPath = $this->generate_local_image($fileName);
 
-        $filenameRelative = $this->getFilenameRelativeFromAbsolute($filenameAbsolute);
-        $this->classBeingTested->put($filenameRelative, $filenameAbsolute);
+        $upload = $this->classBeingTested->put($fileName, $imgLocalPath);
 
-        $expected = exif_read_data($filenameAbsolute)['FileDateTime'];
-        $actual = $this->classBeingTested->getTimestamp($this->getFilenameRelativeFromAbsolute($filenameAbsolute));
+        $expected = exif_read_data($imgLocalPath)['FileDateTime'];
+        $actual = $this->classBeingTested->getTimestamp($this->getFilenameRelativeFromAbsolute($imgLocalPath));
 
         /*
          * Actual may be a second or two behind expected because of time file transfer time.
@@ -141,30 +155,30 @@ class RemoteStorageServiceTest extends RemoteStorageTestCase
 
     public function test_get_size()
     {
-        $filenameAbsolute = $this->faker->image(sys_get_temp_dir());
+        $fileName = 'test-image.jpg';
+        $imgLocalPath = $this->generate_local_image($fileName);
 
-        $filenameRelative = $this->getFilenameRelativeFromAbsolute($filenameAbsolute);
-        $this->classBeingTested->put($filenameRelative, $filenameAbsolute);
+        $upload = $this->classBeingTested->put($fileName, $imgLocalPath);
 
         $this->assertEquals(
-            exif_read_data($filenameAbsolute)['FileSize'],
-            $this->classBeingTested->getSize($this->getFilenameRelativeFromAbsolute($filenameAbsolute))
+            exif_read_data($imgLocalPath)['FileSize'],
+            $this->classBeingTested->getSize($this->getFilenameRelativeFromAbsolute($imgLocalPath))
         );
     }
 
     public function test_delete_dir()
     {
         $pass = false;
-        $word = $this->faker->word;
-        $this->classBeingTested->createDir($word);
+        $dirName = 'test-path';
+        $this->classBeingTested->createDir($dirName);
         $contents = $this->classBeingTested->listContents();
-        foreach($contents as $item){
-            if($item['basename'] === $word && $item['type'] === 'dir'){
+        foreach ($contents as $item) {
+            if ($item['path'] === $dirName && $item['type'] === 'dir') {
                 $pass = true;
             }
         }
         $this->assertTrue($pass);
-        $this->classBeingTested->deleteDir($word);
-        $this->assertFalse(Storage::exists($word));
+        $this->classBeingTested->deleteDir($dirName);
+        $this->assertFalse(Storage::exists($dirName));
     }
 }

@@ -23,7 +23,7 @@ class RemoteStorageService
      */
     protected $fileSystemManager;
 
-    public function __construct($optionalPathPrefix = null, FilesystemManager $filesystemManager)
+    public function __construct(FilesystemManager $filesystemManager)
     {
         $this->fileSystemManager = $filesystemManager;
         $this->filesystem = $this->fileSystemManager->disk(ConfigService::$defaultFileSystemDisk);
@@ -90,7 +90,7 @@ class RemoteStorageService
      */
     public function rename($target, $newName)
     {
-        return $this->filesystem->rename($target, $newName);
+        return $this->filesystem->move($target, $newName);
     }
 
     /**
@@ -113,7 +113,7 @@ class RemoteStorageService
      */
     public function getMimetype($target)
     {
-        return $this->filesystem->getMimetype($target);
+        return $this->filesystem->mimeType($target);
     }
 
     /**
@@ -124,7 +124,7 @@ class RemoteStorageService
      */
     public function getTimestamp($target)
     {
-        return $this->filesystem->getTimestamp($target);
+        return $this->filesystem->lastModified($target);
     }
 
     /**
@@ -135,7 +135,7 @@ class RemoteStorageService
      */
     public function getSize($target)
     {
-        return $this->filesystem->getSize($target);
+        return $this->filesystem->fileSize($target);
     }
 
     /**
@@ -146,7 +146,7 @@ class RemoteStorageService
      */
     public function createDir($target)
     {
-        return $this->filesystem->createDir($target);
+        return $this->filesystem->makeDirectory($target);
     }
 
     /**
@@ -157,7 +157,7 @@ class RemoteStorageService
      */
     public function deleteDir($target)
     {
-        return $this->filesystem->deleteDir($target);
+        return $this->filesystem->deleteDirectory($target);
     }
 
     /**
@@ -171,7 +171,7 @@ class RemoteStorageService
         if (!empty($targetDir)) {
             return $this->filesystem->listContents($targetDir, true);
         } else {
-            return $this->filesystem->listContents();
+            return $this->filesystem->listContents('/');
         }
     }
 

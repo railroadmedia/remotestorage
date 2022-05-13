@@ -2,6 +2,7 @@
 
 namespace Railroad\RemoteStorage\Tests;
 
+use Dotenv\Dotenv;
 use Faker\Generator;
 use Orchestra\Testbench\TestCase as BaseTestCase;
 use Railroad\RemoteStorage\Providers\RemoteStorageServiceProvider;
@@ -18,7 +19,7 @@ class RemoteStorageTestCase extends BaseTestCase
 
     protected $remoteStorageService;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -30,11 +31,15 @@ class RemoteStorageTestCase extends BaseTestCase
     /**
      * Define environment setup.
      *
-     * @param  \Illuminate\Foundation\Application $app
+     * @param \Illuminate\Foundation\Application $app
      * @return void
      */
     protected function getEnvironmentSetUp($app)
     {
+        // setup package config for testing
+        $dotenv = Dotenv::createImmutable(__DIR__ . '/../', '.env.testing');
+        $dotenv->load();
+
         // setup package config for testing
         $defaultConfig = require(__DIR__ . '/../config/remotestorage.php');
         $app['config']->set('filesystems.disks', $defaultConfig['filesystems.disks']);
@@ -65,16 +70,19 @@ class RemoteStorageTestCase extends BaseTestCase
         return sys_get_temp_dir() . '/' . $filenameRelative;
     }
 
-    protected function tearDown()
+    protected function tearDown(): void
     {
         parent::tearDown();
 
-        $contentsList = $this->remoteStorageService->listContents();
+        $contentsList = $this->remoteStorageService->listContents('/');
+
         foreach ($contentsList as $content) {
-            if ($content['type'] == "file") {
+            if ($content['type'] == "file" && ($content['path'] == 'test-image.jpg' || $content['path'] == 'roxana.jpg')) {
                 $this->remoteStorageService->delete($content['path']);
-            } else if ($content['type'] == "dir" && ($content['path'] != "framework")) {
-                $this->remoteStorageService->deleteDir($content['path']);
+            } else {
+                if ($content['type'] == "dir" && $content['path'] == 'test-path') {
+                    $this->remoteStorageService->deleteDir($content['path']);
+                }
             }
         }
     }

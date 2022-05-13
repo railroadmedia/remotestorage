@@ -15,6 +15,5 @@ return
                 'root' => storage_path('app'),
             ],
         ],
-        'filesystems.default' => 'local'
-
+        'filesystems.default' => 's3'
     ];
